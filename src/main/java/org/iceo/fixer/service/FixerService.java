@@ -4,15 +4,14 @@ import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.iceo.fixer.models.ResponseInfo;
+import org.iceo.fixer.models.TimeSeries;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.iceo.fixer.utlis.PropertiesHandler.getBaseUrl;
 
 @Slf4j
 public class FixerService {
-
-    public static final String BASE_URL = "https://api.apilayer.com/fixer/timeseries";
 
     public FixerService() {
     }
@@ -28,13 +27,13 @@ public class FixerService {
     }
 
     public static void postTimeseriesResponse() {
-        log.info("Trying to post to: {}", BASE_URL);
+        log.info("Trying to post to: {}", getBaseUrl());
         response = given()
                 .header("apikey", getApiKey())
                 .queryParam("start_date", "")
                 .queryParam("end_date", "")
                 .when()
-                .post(BASE_URL);
+                .post(getBaseUrl());
     }
 
     public static void getTimeseriesResponse(String apiKey, String url, String startDate, String endDate) {
@@ -52,9 +51,9 @@ public class FixerService {
     }
 
     @SneakyThrows
-    public static void assertErrorCode(int errorCode) {
+    public static void assertBase(String base) {
         ObjectMapper mapper = new ObjectMapper();
-        ResponseInfo responseInfo = mapper.readValue(response.getBody().asString(), ResponseInfo.class);
-        assertThat(responseInfo.getError().getCode()).isEqualTo(errorCode);
+        TimeSeries timeSeries = mapper.readValue(response.getBody().asString(), TimeSeries.class);
+        assertThat(timeSeries.getBase()).isEqualTo(base);
     }
 }
